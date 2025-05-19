@@ -121,7 +121,7 @@ composer run dev
 ### Backend
 
 * **Laravel 12**
-* **SQLite Database**
+* **MySQL Database**
 * RESTful API architecture
 * **Laravel Sanctum** for API authentication
 
