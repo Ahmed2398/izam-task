@@ -47,6 +47,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const login = async (email: string, password: string) => {
         const response = await axios.post('/api/auth/login', { email, password });
         setUser(response.data.user);
+        
+        // Store the token in localStorage
+        localStorage.setItem('auth_token', response.data.token);
+        
+        // Set the Authorization header for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
     };
 
     const register = async (name: string, email: string, password: string, password_confirmation: string) => {
@@ -57,11 +63,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             password_confirmation,
         });
         setUser(response.data.user);
+        
+        // Store the token in localStorage
+        localStorage.setItem('auth_token', response.data.token);
+        
+        // Set the Authorization header for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
     };
 
     const logout = async () => {
         await axios.post('/api/auth/logout');
         setUser(null);
+        
+        // Remove the token from localStorage
+        localStorage.removeItem('auth_token');
+        
+        // Remove the Authorization header
+        delete axios.defaults.headers.common['Authorization'];
     };
 
     const fetchCsrf = async () => {
@@ -69,6 +87,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     useEffect(() => {
+        // Check if we have a token in localStorage
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            // Set the Authorization header if we have a token
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
+        
         fetchCsrf().then(() => fetchUser());
     }, []);
 
