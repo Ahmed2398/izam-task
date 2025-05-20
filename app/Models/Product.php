@@ -44,7 +44,14 @@ class Product extends Model
      */
     protected function image(): Attribute
     {
-        return Attribute::get(fn (): string => 'https://fakeimg.pl/250/');
+        // Generate a reliable product image based on product ID
+        return Attribute::get(function (): string {
+            // Use product ID to ensure consistent but different images
+            $id = $this->id % 20 + 1; // Get a number between 1-20
+            
+            // Use placeholder.com which is reliable for testing
+            return "https://picsum.photos/seed/product{$id}/400/400";
+        });
     }
 
     /**
