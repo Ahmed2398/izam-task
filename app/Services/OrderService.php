@@ -8,28 +8,33 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\BaseService;
-use Carbon\Carbon;
+use App\Services\ProductService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 
 class OrderService extends BaseService
 {
+    /**
+     * @var ProductService
+     */
+    protected $productService;
+
+    public function __construct(ProductService $productService)
+    {
+        $this->productService = $productService;
+    }
+
     /**
      * Get paginated orders for a specific user
      */
     public function getUserOrders(User $user, int $page = 1): LengthAwarePaginator
     {
-        $key = "orders-{$page}-{$user->id}";
-
-        return Cache::remember($key, Carbon::now()->addMinutes(5), function () use ($user) {
-            return $user->orders()
-                ->with('products')
-                ->latest()
-                ->paginate();
-        });
+        return $user->orders()
+            ->with('products')
+            ->latest()
+            ->paginate();
     }
 
     /**
@@ -39,7 +44,7 @@ class OrderService extends BaseService
     {
         DB::transaction(function () use ($user, $productsData): void {
             // Get available products
-            $products = $this->getAvailableProducts($productsData);
+            $products = $this->productService->getAvailableProducts($productsData);
 
             // Create order
             $order = $this->storeOrder($user, $products, $productsData);
@@ -55,18 +60,7 @@ class OrderService extends BaseService
         });
     }
 
-    /**
-     * Get available products based on requested quantities
-     */
-    private function getAvailableProducts(SupportCollection $productsData): Collection
-    {
-        return Product::query()
-            ->whereIn('id', $productsData->pluck('id'))
-            ->get()
-            ->filter(fn (Product $product): bool => 
-                (int) $productsData->where('id', $product->id)->value('quantity', 1) <= $product->quantity
-            );
-    }
+
 
     /**
      * Store the order in database

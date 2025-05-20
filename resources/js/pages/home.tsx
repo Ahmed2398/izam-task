@@ -120,11 +120,14 @@ const Home: React.FC = () => {
     }, []);
 
     const clearFilters = () => {
-        changeParam('page', '1');
-        changeParam('search', '');
-        changeParam('min_price', '0');
-        changeParam('max_price', '1000');
-        changeParam('categories', '');
+        // Create a new URLSearchParams with only the default values
+        const defaultParams = new URLSearchParams();
+        defaultParams.set('min_price', '0');
+        defaultParams.set('max_price', '1000');
+        defaultParams.set('page', '1');
+        
+        // Set the params directly instead of using changeParam multiple times
+        setParams(defaultParams);
         setIsFilterOpen(false);
     };
 

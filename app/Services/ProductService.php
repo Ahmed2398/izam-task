@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\Product;
 use App\Services\BaseService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection as SupportCollection;
 
 class ProductService extends BaseService
 {
@@ -44,5 +46,18 @@ class ProductService extends BaseService
     public function getProduct(Product $product): Product
     {
         return $product->load('category');
+    }
+
+    /**
+     * Get available products based on requested quantities
+     */
+    public function getAvailableProducts(SupportCollection $productsData): Collection
+    {
+        return Product::query()
+            ->whereIn('id', $productsData->pluck('id'))
+            ->get()
+            ->filter(fn (Product $product): bool => 
+                (int) $productsData->where('id', $product->id)->value('quantity', 1) <= $product->quantity
+            );
     }
 }

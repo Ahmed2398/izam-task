@@ -22,10 +22,10 @@ class ProductFilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search' => ['nullable', 'string'],
-            'categories' => ['nullable', 'string'],
-            'min_price' => ['nullable', 'numeric'],
-            'max_price' => ['nullable', 'numeric'],
+            'search' => ['sometimes', 'string'],
+            'categories' => ['sometimes', 'string'],
+            'min_price' => ['sometimes', 'numeric'],
+            'max_price' => ['sometimes', 'numeric'],
         ];
     }
 }

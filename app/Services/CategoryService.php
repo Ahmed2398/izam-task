@@ -13,6 +13,6 @@ class CategoryService extends BaseService
      */
     public function getAllCategories(): Collection
     {
-        return Category::all();
+        return Category::query()->get();
     }
 }
